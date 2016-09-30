@@ -55,8 +55,8 @@ def findCenter(camera):
 		imgc[x][avg] = colors[1]
 		x += 1
 	end = time.time()
-	#cv2.imshow("image",imgc)
-	#cv2.waitKey(0)
+	cv2.imshow("image",imgc)
+	cv2.waitKey(0)
 	PD(avg - 160)
 def PD(error):
 	start = time.time()
