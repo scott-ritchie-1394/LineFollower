@@ -7,7 +7,6 @@ import numpy as np
 import cv2
 import io
 
-image = None
 colors = [[0,0,0],[255,0,0],[0,255,0],[0,0,255],[255,255,0],[255,0,255],[0,255,255],[255,255,255],[0,0,0]]
 def findCenters(camera):
 	stream = io.BytesIO()
@@ -37,12 +36,15 @@ def findCenters(camera):
 			x += 1
 		horLine -= 15
 		i += 1
-	image = imgc
+		sum = 0
+		count = 0
+	return imgc
 with PiCamera() as camera:
 	camera.resolution = (320,240)
 	i = 0
-	while i < 10:
-		findCenters(camera)
-		filename = "./Images/colorImage" + str(i) + ".jpeg"
+	image = None
+	while i < 100:
+		image = findCenters(camera)
+		filename = "./Images/colorImage" + str(i) + ".jpg"
 		cv2.imwrite(filename,image)
 		i += 1

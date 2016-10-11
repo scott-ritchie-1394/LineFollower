@@ -14,7 +14,7 @@ def findCenters(camera):
 	data = np.fromstring(stream.getvalue(), dtype=np.uint8)
 	imgc = cv2.imdecode(data,1)
 	img = cv2.cvtColor(imgc,cv2.COLOR_BGR2GRAY)
-	thresh1 = cv2.threshold(img,150,255,cv2.THRESH_BINARY)
+	thresh1 = cv2.threshold(img,170,255,cv2.THRESH_BINARY)
 	count = 0
 	sum = 0
 	i = 0
@@ -36,6 +36,8 @@ def findCenters(camera):
 			x += 1
 		horLine -= 15
 		i += 1
+		sum = 0
+		count = 0
 	cv2.imshow("image",imgc)
 	cv2.waitKey(0)
 with PiCamera() as camera:
