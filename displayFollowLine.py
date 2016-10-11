@@ -52,6 +52,7 @@ def PD(error):
 	Pvalue = Kp*error
 	Dvalue = Kd * (error - dt)
 	PD = Pvalue + Dvalue
+	print(PD)
 	return PD 
 with PiCamera() as camera:
 	camera.resolution = (320,240)
@@ -59,5 +60,4 @@ with PiCamera() as camera:
 	while myCount < 100:
 		startTotal = time.time()
 		findCenter(camera)
-		print("Time = " + str(time.time() - startTotal))
 		myCount += 1 
