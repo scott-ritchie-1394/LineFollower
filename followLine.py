@@ -22,11 +22,13 @@ def convertToBits(number):
 		else:
 			bits.append(1)
 	return bits
-def findCenter(camera):
-	stream = io.BytesIO()
-	camera.capture(stream, format='jpeg',use_video_port=True)
+def findCenter(camera,stream):
+	start = time.time()
+	#stream = io.BytesIO()
+	camera.capture(stream, format='bgr',use_video_port=True)
 	data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-	imgc = cv2.imdecode(data,1)
+	print("Capture time: " + str(time.time() - start))
+	imgc = stream.array
 	img = cv2.cvtColor(imgc,cv2.COLOR_BGR2GRAY)
 	thresh1 = cv2.threshold(img,150,255,cv2.THRESH_BINARY)
 	count = 0
@@ -47,10 +49,12 @@ def PD(error):
 	PD = Pvalue + Dvalue
 	return PD 
 with PiCamera() as camera:
-	camera.resolution = (320,240)
-	myCount = 0
-	while myCount < 100:
-		startTotal = time.time()
-		findCenter(camera)
-		print("Time = " + str(time.time() - startTotal))
-		myCount += 1 
+	with PiRGBArray(camera) as stream:
+		camera.resolution = (320,240)
+		myCount = 0
+		while myCount < 100:
+			startTotal = time.time()
+			findCenter(camera,stream)
+			stream.truncate(0)
+			print("Time = " + str(time.time() - startTotal))
+			myCount += 1 

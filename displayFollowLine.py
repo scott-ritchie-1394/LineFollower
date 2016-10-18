@@ -11,6 +11,7 @@ import io
 Kp = 2
 Kd = 1
 dt = 0
+strait = 85
 horLine = 200
 colors = [[0,0,0],[255,0,0],[0,255,0],[0,0,255],[255,255,0],[255,0,255],[0,255,255],[255,255,255],[0,0,0]]
 def convertToBits(number):
@@ -51,7 +52,7 @@ def findCenter(camera):
 def PD(error):
 	Pvalue = Kp*error
 	Dvalue = Kd * (error - dt)
-	PD = Pvalue + Dvalue
+	PD = Pvalue + Dvalue + strait
 	print(PD)
 	return PD 
 with PiCamera() as camera:
