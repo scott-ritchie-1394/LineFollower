@@ -6,18 +6,12 @@ from picamera.array import PiRGBArray
 from PiVideoStream import PiVideoStream
 from picamera import PiCamera
 import numpy as np
-import serial
-import os.path
 import time
 import imutils
 import cv2
 import io
 
-try:
-	ser = serial.Serial('/dev/ttyACM0',115200)
-except:
-	ser = serial.Serial('/dev/ttyACM1',115200)
-time.sleep(.1)
+
 width = 640
 height = 480
 Kp = 2
@@ -49,20 +43,12 @@ def findCenter(vs):
 		avg = int(sum / count)
 	else:
 		avg = -1
-	steer(PD(avg - (width/2)))
+	PD(avg - (width/2))
 def PD(error):
 	Pvalue = Kp*error
 	Dvalue = Kd * (error - dt)
 	PD = Pvalue + Dvalue
 	return PD 
-def steer(ste):
-	ser.write('B')
-	if ste == 0:
-		ser.write('000')
-	elif ste < 100:
-		ser.write('0'+str(ste))
-	else:
-		sersrite(str(ste))
 vs = PiVideoStream().start()
 time.sleep(2.0)
 myCount = 0
@@ -70,4 +56,5 @@ startLoop = time.time()
 while myCount < 100:
 	findCenter(vs)
 	myCount += 1
+print(str(100/(time.time() - startLoop)) + " FPS")
 vs.stop() 
