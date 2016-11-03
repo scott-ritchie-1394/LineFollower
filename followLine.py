@@ -12,18 +12,19 @@ import time
 import imutils
 import cv2
 import io
+import spidev
 
-try:
-	ser = serial.Serial('/dev/ttyACM0',115200)
-except:
-	ser = serial.Serial('/dev/ttyACM1',115200)
-time.sleep(.1)
+drive = 16
+angle = 0
+
+spi = spidev.SpiDev()
+spi.open(0,0)
 width = 640
 height = 480
-Kp = 2
-Kd = 1
+Kp = .3984 * 1.25 
+Kd = 0
 dt = 0
-horLine = 380
+horLine = 250
 colors = [[0,0,0],[255,0,0],[0,255,0],[0,0,255],[255,255,0],[255,0,255],[0,255,255],[255,255,255],[0,0,0]]
 def convertToBits(number):
 	bits = []
@@ -36,8 +37,9 @@ def convertToBits(number):
 	return bits
 def findCenter(vs):
 	imgc = vs.read()
+	imgc = cv2.GaussianBlur(imgc,(1,1),0)
 	img = cv2.cvtColor(imgc,cv2.COLOR_BGR2GRAY)
-	thresh1 = cv2.threshold(img,150,255,cv2.THRESH_BINARY)
+	thresh1 = cv2.threshold(img,200,255,cv2.THRESH_BINARY)
 	count = 0
 	sum = 0
 	for y in range(0,width):
@@ -49,25 +51,36 @@ def findCenter(vs):
 		avg = int(sum / count)
 	else:
 		avg = -1
-	steer(PD(avg - (width/2)))
-def PD(error):
-	Pvalue = Kp*error
+		return
+	PD(avg - (width/2))
+	#steer(PD(avg - (width/2)))
+def PD(error_orig):
+	error = 0
+	if(error_orig < 0):
+		error = error_orig - 30
+	else:
+		error = error_orig + 20
+	Pvalue = int(round(Kp*error + 127.5))
 	Dvalue = Kd * (error - dt)
 	PD = Pvalue + Dvalue
+	if(PD < 0):
+		PD = 0
+	if(PD > 255):
+		PD = 254
+	steer(PD)
 	return PD 
 def steer(ste):
-	ser.write('B')
-	if ste == 0:
-		ser.write('000')
-	elif ste < 100:
-		ser.write('0'+str(ste))
-	else:
-		sersrite(str(ste))
+	spi.xfer([angle,ste])
 vs = PiVideoStream().start()
 time.sleep(2.0)
 myCount = 0
-startLoop = time.time()
-while myCount < 100:
+spi.xfer([drive,50])
+spi.xfer([drive,118])
+start = time.time()
+while myCount < 300:
 	findCenter(vs)
 	myCount += 1
+print("FPS: " + str(300/(time.time() - start)))
+spi.xfer([angle,128])
+spi.xfer([drive,128])
 vs.stop() 

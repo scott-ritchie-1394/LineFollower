@@ -30,6 +30,7 @@ def convertToBits(number):
 	return bits
 def findCenter(vs):
 	imgc = vs.read()
+	imgc = cv2.GaussianBlur(imgc,(3,3),0)
 	img = cv2.cvtColor(imgc,cv2.COLOR_BGR2GRAY)
 	thresh1 = cv2.threshold(img,150,255,cv2.THRESH_BINARY)
 	count = 0
