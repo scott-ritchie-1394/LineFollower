@@ -8,8 +8,8 @@ import time
 import cv2
 import io
 
-Kp = .3984 *2
-Kd = 0
+Kp = .3984 *1.25
+Kd = .5
 dt = 0
 strait = 160
 horLine = 300
@@ -53,15 +53,25 @@ def findCenter(camera):
 	#cv2.imshow("thresh",thresh1[1])
 	cv2.waitKey(0)
 def PD(error_orig):
+	global dt
 	error = 0
 	if(error_orig < 0):
-		error = error_orig - 30
+		error = error_orig - 40
 	else:
 		error = error_orig + 20
 	Pvalue = int(round(Kp*error + 127.5))
-	Dvalue = Kd * (error - dt)
+	if(Pvalue < 0 ):
+		Pvalue = 0
+	if(Pvalue > 255):
+		Pvalue = 254
+	Dvalue = int(round(Kd * (error - dt)))
+	dt = error
 	PD = Pvalue + Dvalue
-	print(PD)
+	if(PD < 0):
+		PD = 0
+	if(PD > 255):
+		PD = 254
+	print("PVAL: " + str(Pvalue) + ", DVAL: " + str(Dvalue) + ", PD: " + str(PD))
 	return PD 
 with PiCamera() as camera:
 	camera.resolution = (640,480)

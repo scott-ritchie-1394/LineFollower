@@ -22,9 +22,11 @@ spi.open(0,0)
 width = 640
 height = 480
 Kp = .3984 * 1.25 
-Kd = 0
-dt = 0
-horLine = 250
+Kd = 2
+dt = 128
+it = 0
+Ki = 0 
+horLine = 300
 colors = [[0,0,0],[255,0,0],[0,255,0],[0,0,255],[255,255,0],[255,0,255],[0,255,255],[255,255,255],[0,0,0]]
 def convertToBits(number):
 	bits = []
@@ -55,18 +57,31 @@ def findCenter(vs):
 	PD(avg - (width/2))
 	#steer(PD(avg - (width/2)))
 def PD(error_orig):
+	global dt,it
 	error = 0
 	if(error_orig < 0):
-		error = error_orig - 30
+		error = error_orig - 40
 	else:
 		error = error_orig + 20
 	Pvalue = int(round(Kp*error + 127.5))
-	Dvalue = Kd * (error - dt)
-	PD = Pvalue + Dvalue
+	if(Pvalue < 0):
+		Pvalue = 0
+	if(Pvalue > 255):
+		Pvalue = 254
+	Dvalue = int(round(Kd * ((Pvalue) - dt)))
+	it = it + Pvalue
+	if it > 255:
+		it = 254
+	elif it < 0:
+		it = 0
+	dt = Pvalue
+	Ivalue = it * Ki
+	PD = Pvalue + Dvalue + int(round(Ivalue))
 	if(PD < 0):
 		PD = 0
 	if(PD > 255):
 		PD = 254
+	#print("PVAL: " + str(Pvalue) + ", DVAL: " + str(Dvalue) + ", PD: " + str(PD))
 	steer(PD)
 	return PD 
 def steer(ste):
@@ -75,12 +90,20 @@ vs = PiVideoStream().start()
 time.sleep(2.0)
 myCount = 0
 spi.xfer([drive,50])
-spi.xfer([drive,118])
+time.sleep(.1)
+spi.xfer([drive,119])
 start = time.time()
-while myCount < 300:
+toModulate = 1
+while myCount < 500:
+	if(toModulate % 5 == 0):
+		spi.xfer([drive,128])
+		toModulate = 1
+	else:
+		spi.xfer([drive,119])
 	findCenter(vs)
 	myCount += 1
-print("FPS: " + str(300/(time.time() - start)))
+	toModulate = toModulate + 1
+print("FPS: " + str(500/(time.time() - start)))
 spi.xfer([angle,128])
 spi.xfer([drive,128])
 vs.stop() 

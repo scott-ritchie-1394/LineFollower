@@ -20,10 +20,10 @@ spi.open(0, 0)
 #spi.xfer([angle, 100])
 #time.sleep(2)
 
-for i in range(255):
+for i in range(0,255):
     spi.xfer([angle, i])
     #spi.xfer([drive, i])
-    time.sleep(.1)
+    time.sleep(.05)
     print i
 
 
