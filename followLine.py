@@ -13,6 +13,7 @@ import imutils
 import cv2
 import io
 import spidev
+import PID
 
 drive = 16
 angle = 0
@@ -27,6 +28,7 @@ dt = 128
 it = 0
 Ki = 0 
 horLine = 300
+pid = PID.PID(.5,.1,2)
 colors = [[0,0,0],[255,0,0],[0,255,0],[0,0,255],[255,255,0],[255,0,255],[0,255,255],[255,255,255],[0,0,0]]
 def convertToBits(number):
 	bits = []
@@ -57,31 +59,34 @@ def findCenter(vs):
 	PD(avg - (width/2))
 	#steer(PD(avg - (width/2)))
 def PD(error_orig):
-	global dt,it
+	global dt,it,pid
 	error = 0
 	if(error_orig < 0):
 		error = error_orig - 40
 	else:
 		error = error_orig + 20
-	Pvalue = int(round(Kp*error + 127.5))
-	if(Pvalue < 0):
-		Pvalue = 0
-	if(Pvalue > 255):
-		Pvalue = 254
-	Dvalue = int(round(Kd * ((Pvalue) - dt)))
-	it = it + Pvalue
-	if it > 255:
-		it = 254
-	elif it < 0:
-		it = 0
-	dt = Pvalue
-	Ivalue = it * Ki
-	PD = Pvalue + Dvalue + int(round(Ivalue))
+	pid.update(-error_orig )
+	PD = int(round(pid.output + 127.5))
+	#Pvalue = int(round(Kp*error + 127.5))
+	#if(Pvalue < 0):
+	#	Pvalue = 0
+	#if(Pvalue > 255):
+	#	Pvalue = 254
+	#Dvalue = int(round(Kd * ((Pvalue) - dt)))
+	#it = it + Pvalue
+	#if it > 255:
+	#	it = 254
+	#elif it < 0:
+	#	it = 0
+	#dt = Pvalue
+	#Ivalue = it * Ki
+	#PD = Pvalue + Dvalue + int(round(Ivalue))
 	if(PD < 0):
 		PD = 0
 	if(PD > 255):
 		PD = 254
 	#print("PVAL: " + str(Pvalue) + ", DVAL: " + str(Dvalue) + ", PD: " + str(PD))
+	print(PD)
 	steer(PD)
 	return PD 
 def steer(ste):
@@ -94,16 +99,16 @@ time.sleep(.1)
 spi.xfer([drive,119])
 start = time.time()
 toModulate = 1
-while myCount < 500:
-	if(toModulate % 5 == 0):
-		spi.xfer([drive,128])
-		toModulate = 1
-	else:
-		spi.xfer([drive,119])
+while myCount < 400:
+	#if(toModulate % 7 == 0):
+	#	spi.xfer([drive,128])
+	#	toModulate = 1
+	#else:
+	#	spi.xfer([drive,119])
 	findCenter(vs)
 	myCount += 1
 	toModulate = toModulate + 1
-print("FPS: " + str(500/(time.time() - start)))
+print("FPS: " + str(400/(time.time() - start)))
 spi.xfer([angle,128])
 spi.xfer([drive,128])
 vs.stop() 
