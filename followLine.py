@@ -22,19 +22,19 @@ spi = spidev.SpiDev()
 spi.open(0,0)
 width = 640
 height = 480
-Kp = .3984 * 1
-Kd = 3.80
+Kp = .3984 * 1 
+Kd = 3.8
 dt = 128
 it = 0
 Ki = 0 
-horLine = 280
+horLine = 260
 pid = PID.PID(.5,0,2)
 colors = [[0,0,0],[255,0,0],[0,255,0],[0,0,255],[255,255,0],[255,0,255],[0,255,255],[255,255,255],[0,0,0]]
 def findCenter(vs,lastAvg):
 	imgc = vs.read()
 	imgc = cv2.GaussianBlur(imgc,(1,1),0)
 	img = cv2.cvtColor(imgc,cv2.COLOR_BGR2GRAY)
-	thresh1 = cv2.threshold(img,90,255,cv2.THRESH_BINARY)
+	thresh1 = cv2.threshold(img,80,255,cv2.THRESH_BINARY)
 	count = 0
 	sum = 0
 	count2 = 0
@@ -87,19 +87,20 @@ def PD(error_orig,avg):
 def steer(ste):
 	spi.xfer([angle,ste])
 vs = PiVideoStream().start()
-time.sleep(2.0)
+time.sleep(2)
 myCount = 0
 avgCount = 0
-spi.xfer([drive,50])
+spi.xfer([drive,30])
+time.sleep(.1)
 start = time.time()
 toModulate = 1
 lastAvg = 0
-while myCount < 900:
-	if(toModulate % 5 == 0):
+while myCount < 1100:
+	if(toModulate % 4 == 0):
 		spi.xfer([drive,128])
 		toModulate = 1
 	else:
-		if(avgCount > 10):
+		if(avgCount > 9):
 			spi.xfer([drive,117])
 		else:
 			spi.xfer([drive,117])
@@ -111,7 +112,7 @@ while myCount < 900:
 		avgCount = 0
 	myCount += 1
 	toModulate = toModulate + 1
-print("FPS: " + str(900/(time.time() - start)))
+print("FPS: " + str(1100/(time.time() - start)))
 spi.xfer([angle,128])
 spi.xfer([drive,128])
 vs.stop() 
