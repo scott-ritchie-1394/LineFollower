@@ -7,6 +7,7 @@ class PiVideoStream:
 	def __init__(self, resolution=(640,480), framerate=32):
 		# initialize the camera and stream
 		self.camera = PiCamera()
+		print("LOWERING BRIGHNESS...")
 		self.camera.resolution = resolution
 		self.camera.framerate = framerate
 		self.rawCapture = PiRGBArray(self.camera, size=resolution)

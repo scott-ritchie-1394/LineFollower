@@ -21,8 +21,8 @@ spi.open(0, 0)
 #time.sleep(2)
 
 for i in range(0,255):
-    spi.xfer([angle, i])
-    #spi.xfer([drive, i])
+    #spi.xfer([angle, i])
+    spi.xfer([drive, i])
     time.sleep(.05)
     print i
 

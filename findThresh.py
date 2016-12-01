@@ -33,7 +33,7 @@ def testThresh(camera,thresh):
 	cv2.waitKey(0)
 with PiCamera() as camera:
 	camera.resolution = (320,240)
-	myCount = 150
+	myCount = 70
 	while myCount < 240:
 		print("Current Threshold: " + str(myCount))
 		testThresh(camera,myCount)
